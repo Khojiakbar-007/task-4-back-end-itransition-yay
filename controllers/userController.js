@@ -1,5 +1,8 @@
 import {
-  getUserFromId
+    blockUserById,
+    getAllUsersData,
+  getUserFromId,
+  unblockUserById
 } from '../services/userService.js';
   
 const getUserInfo = async (req, res, next) => {
@@ -15,7 +18,43 @@ const getUserInfo = async (req, res, next) => {
         next(error);
     }
 };
+
+const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await getAllUsersData()
+        console.log('users: ', users)
+        const usersInfo = users.map(({_id, name, email, blocked}) => ({ _id, name, email, blocked: !!blocked}))
+        console.log('usersInfo: ', usersInfo)
+        res.json({users: usersInfo})
+    } catch (error) {
+        next(error)
+    }
+}
+
+const blockUser = async (req, res, next) => {
+    const userId = req.authData.userId
+    try {
+        const userBlocked = await blockUserById(userId)
+        res.json({message: 'Successfully blocked', res: userBlocked})
+    } catch (error) {
+        next(error)
+    }
+}
+
+const unblockUser = async (req, res, next) => {
+    const userId = req.authData.userId
+    try {
+        const userUnblocked = await unblockUserById(userId)
+        res.json({message: 'Successfully unblocked', res: userUnblocked})
+    } catch (error) {
+        next(error)
+    }
+}
+
  
 export default { 
-    getUserInfo
+    getUserInfo,
+    getAllUsers,
+    blockUser,
+    unblockUser
 }

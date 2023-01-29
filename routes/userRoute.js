@@ -16,4 +16,28 @@ const router = express.Router();
     controller.getUserInfo
   );
 
+ router
+  .route('/get-all-users')
+  .get(
+    trimRequest.all,
+    isActiveUser,
+    controller.getAllUsers
+  );
+
+ router
+  .route('/block-user')
+  .post(
+    trimRequest.all,
+    isActiveUser,
+    controller.blockUser
+  );
+
+ router
+  .route('/unblock-user')
+  .post(
+    trimRequest.all,
+    isActiveUser,
+    controller.unblockUser
+  );
+
 export default router;

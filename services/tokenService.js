@@ -36,11 +36,12 @@ const clearRefreshToken = async (token) => {
 };
 
 const generateAuthTokens = async (user) => {
+  console.log('started to generate auth tokens')
   const loginTime = moment();
   let accessTokenExpiresAt = loginTime
   .clone()
   .add(process.env.ACCESS_TOKEN_EXPIRATION_MINUTES, 'minutes');
-  
+  console.log('generating auth tokens')
   const accessToken = await generateToken(
     user._id,
     loginTime,

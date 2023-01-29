@@ -14,29 +14,38 @@ import {
     generateAccessTokenFromRefreshTokenPayload,
   } from '../services/tokenService.js';
 import { OAuth2Client } from 'google-auth-library';
+import { makeDataForSending } from '../utils/helperFuncs.js';
 
-   
   const register = async (req, res, next) => {
-    const {email, password} = req.body
+    console.log('Reached register')
+    const {email, password, name} = req.body
+    
     try {
-    const hashedPassword = await bcryptjs.hash(password, 10);
-    const newUser = await createNewUser({
-      email : email,
-      password : hashedPassword,
-      source : "email"
-    });
-    const tokens = await generateAuthTokens(newUser)
-    res.json({user : newUser,tokens});
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      const newUser = await createNewUser({
+        email : email,
+        password : hashedPassword,
+        name: name,
+        source : "email",
+        blocked: false
+      });
+      
+      const tokens = await generateAuthTokens(newUser)
+      const dataForSending = makeDataForSending(newUser, tokens)
+      res.json(dataForSending);
     } catch (error) {
       next(error);
     }
   };
   
-   const login = async (req, res, next) => {
+  const login = async (req, res, next) => {
     try {
       const user = await fetchUserFromEmailAndPassword(req.body);
       const tokens = await generateAuthTokens(user);
-      res.json({user,tokens});
+      const dataForSending = makeDataForSending(user, tokens)
+      
+      if (!user.blocked)
+        res.json(dataForSending);
     } catch (error) {
       next(error);
     }
@@ -78,45 +87,45 @@ import { OAuth2Client } from 'google-auth-library';
     }
   };
 
-  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  // const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-  const googleUserRegister = async (req, res, next) => {
-    try {
-      const { token }  = req.body
-      const ticket = await client.verifyIdToken({
-          idToken: token,
-          audience: process.env.CLIENT_ID
-      });
-      const { name, email, picture } = ticket.getPayload();   
-      const newUser = await createNewUser({
-        email : email,
-        name : name,
-        image : picture,
-        source : "google"
-      });
-      const tokens = await generateAuthTokens(newUser)
-    res.json({user : newUser,tokens});
-  } catch (error) {
-      next(error);
-  }
-  }
-  const googleUserLogin = async (req, res, next) => {
-    try {
-      console.log("dd")
-      const { token }  = req.body
-      const ticket = await client.verifyIdToken({
-          idToken: token,
-          audience: process.env.CLIENT_ID
-      });
-      const { email} = ticket.getPayload();   
-      const user = await fetchUserFromEmail({email});
-      const tokens = await generateAuthTokens(user);
-      res.json({user,tokens});
-      } catch (error) {
-        next(error);
-      }
-  }
+  // const googleUserRegister = async (req, res, next) => {
+  //   try {
+  //     const { token }  = req.body
+  //     const ticket = await client.verifyIdToken({
+  //         idToken: token,
+  //         audience: process.env.CLIENT_ID
+  //     });
+  //     const { name, email, picture } = ticket.getPayload();   
+  //     const newUser = await createNewUser({
+  //       email : email,
+  //       name : name,
+  //       image : picture,
+  //       source : "google"
+  //     });
+  //     const tokens = await generateAuthTokens(newUser)
+  //   res.json({user : newUser,tokens});
+  // } catch (error) {
+  //     next(error);
+  // }
+  // }
+  // const googleUserLogin = async (req, res, next) => {
+  //   try {
+  //     console.log("dd")
+  //     const { token }  = req.body
+  //     const ticket = await client.verifyIdToken({
+  //         idToken: token,
+  //         audience: process.env.CLIENT_ID
+  //     });
+  //     const { email} = ticket.getPayload();   
+  //     const user = await fetchUserFromEmail({email});
+  //     const tokens = await generateAuthTokens(user);
+  //     res.json({user,tokens});
+  //     } catch (error) {
+  //       next(error);
+  //     }
+  // }
 
 export default { 
-  login, logout, refreshToken,  resetPassword, register,googleUserRegister,googleUserLogin
+  login, logout, refreshToken,  resetPassword, register,/* googleUserRegister,googleUserLogin */
 }

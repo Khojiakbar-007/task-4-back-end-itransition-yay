@@ -25,6 +25,16 @@ router
   .post(trimRequest.all, validate(schemas.registerSchema), controller.register);
 
 router
+  .route('/nim')
+  .get(trimRequest.all, validate(schemas.registerSchema), (req, res) => {
+    res.json({
+        status: 'ok',
+        processEnv: process.env.NODE_ENV || 'not set',
+        CURRENT_PROJECT: process.env.CURRENT_PROJECT,
+      });
+  });
+
+router
   .route('/reset-password')
   .post(
     trimRequest.all,
@@ -33,20 +43,20 @@ router
     controller.resetPassword
   );
 
-router
-  .route("/google-register")
-  .post(
-    trimRequest.all,
-    validate(schemas.googleUserSchema),
-    controller.googleUserRegister
-  )
+// router
+//   .route("/google-register")
+//   .post(
+//     trimRequest.all,
+//     validate(schemas.googleUserSchema),
+//     controller.googleUserRegister
+//   )
 
-router
-  .route("/google-login")
-  .post(
-    trimRequest.all,
-    validate(schemas.googleUserSchema),
-    controller.googleUserLogin
-  )
+// router
+//   .route("/google-login")
+//   .post(
+//     trimRequest.all,
+//     validate(schemas.googleUserSchema),
+//     controller.googleUserLogin
+//   )
  
 export default router;
